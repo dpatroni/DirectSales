@@ -10,7 +10,7 @@ export default async function HistoryPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    let orders = [];
+    let orders: any[] = [];
     let isConsultantView = false;
 
     if (user) {
