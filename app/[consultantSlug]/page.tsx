@@ -100,6 +100,7 @@ export default async function CatalogPage({ params }: PageProps) {
             basePrice,
             points: p.points,
             isRefill: false,
+            imageUrl: p.imageUrl,
             promotionalPrice,
             refillProduct: refillVersion
         };

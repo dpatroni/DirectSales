@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { addToCart } from '@/app/actions';
 import { ShoppingBag, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { Toast } from './Toast';
 
 // Helper for classes
@@ -20,6 +21,7 @@ export type ProductWithPrice = {
     basePrice: number; // Decimal converted to number for UI
     points: number;
     isRefill: boolean;
+    imageUrl?: string | null;
     promotionalPrice?: number | null; // From CycleProductPrice
 
     // Relations
@@ -85,15 +87,26 @@ export function ProductCard({ product, consultantId }: ProductCardProps) {
                     </div>
                 )}
 
-                {/* Image Placeholder (using a generic color for now or placeholder) */}
+                {/* Product Image */}
                 <div className="aspect-square w-full bg-gray-100 relative group">
-                    {/* Simple Image Placeholder */}
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <ShoppingBag className="w-12 h-12 opacity-20" />
-                    </div>
+                    {displayProduct.imageUrl ? (
+                        <div className="relative w-full h-full">
+                            <Image
+                                src={displayProduct.imageUrl}
+                                alt={displayProduct.name}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                            <ShoppingBag className="w-12 h-12 opacity-20" />
+                        </div>
+                    )}
 
                     {/* Badges */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                         {isPromo && (
                             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                                 -{discountPercent}%

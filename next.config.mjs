@@ -19,9 +19,15 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: 'ui-avatars.com',
-                port: '',
-                pathname: '/api/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'production.na01.natura.com',
+            }
         ],
     },
     // Adding empty turbopack config to silence warning if needed, 

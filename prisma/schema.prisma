@@ -30,6 +30,7 @@ model Product {
   sku         String   @unique
   name        String
   description String?
+  imageUrl    String?  @map("image_url")
   price       Decimal  @default(0.0) @db.Decimal(10, 2) // Base price (PEN)
   points      Int      // Fixed points
   isRefill    Boolean  @default(false) @map("is_refill")
