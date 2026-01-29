@@ -1,12 +1,8 @@
-import { updateConsultant } from '@/app/admin/actions';
-import prisma from '@/lib/prisma';
-import Link from 'next/link';
-import { ArrowLeft, Save } from 'lucide-react';
-import { redirect } from 'next/navigation';
+export default async function EditConsultantPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
 
-export default async function EditConsultantPage({ params }: { params: { id: string } }) {
     const consultant = await prisma.consultant.findUnique({
-        where: { id: params.id }
+        where: { id: id }
     });
 
     if (!consultant) {
