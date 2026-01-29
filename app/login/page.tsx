@@ -66,14 +66,6 @@ export default function LoginPage() {
                     </div>
                 )}
             </div>
-
-            {/* DEBUG SECTION - REMOVE AFTER FIX */}
-            <div className="mt-8 p-4 bg-gray-100 rounded text-xs font-mono text-gray-600 max-w-md w-full break-all">
-                <p className="font-bold border-b mb-2">Debug Info (Vercel):</p>
-                <p>URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ ' + process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 15) + '...' : '❌ MISSING'}</p>
-                <p>KEY: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 5) + '... (Length: ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length + ')' : '❌ MISSING'}</p>
-            </div>
-            {/* END DEBUG */}
         </div>
     )
 }
