@@ -20,7 +20,7 @@ export default async function ProfilePage() {
 
         // Auto-Link Logic
         if (!consultant && user.email) {
-            const existingConsultant = await prisma.consultant.findUnique({
+            const existingConsultant = await prisma.consultant.findFirst({
                 where: { email: user.email },
             });
 
