@@ -8,12 +8,16 @@ interface PageProps {
     params: Promise<{
         consultantSlug: string;
     }>;
+    searchParams: Promise<{
+        brand?: string;
+    }>;
 }
 
 export const dynamic = 'force-dynamic';
 
-export default async function CatalogPage({ params }: PageProps) {
+export default async function CatalogPage({ params, searchParams }: PageProps) {
     const { consultantSlug } = await params;
+    const { brand: brandSlug } = await searchParams;
 
     // 1. Fetch Consultant
     const consultant = await prisma.consultant.findUnique({
@@ -24,26 +28,29 @@ export default async function CatalogPage({ params }: PageProps) {
         notFound();
     }
 
-    // 2. Fetch Active Cycle
-    const activeCycle = await prisma.cycle.findFirst({
-        where: { isActive: true },
-    });
+    // 2. Fetch Active Cycle and Brands
+    const [activeCycle, availableBrands] = await Promise.all([
+        prisma.cycle.findFirst({ where: { isActive: true } }),
+        prisma.brand.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } })
+    ]);
 
-    // 2.1 Persist Consultant Slug -> Moved to Middleware
-    // Server Components cannot set cookies directly during render.
+    // 3. Helper for Brand Filter
+    const brandFilter = brandSlug ? { slug: brandSlug } : undefined;
 
-    // 3. Fetch Products (Main products only, including relation to Refills)
+    // 4. Fetch Products
     const consultantProducts = await prisma.consultantProduct.findMany({
         where: {
             consultantId: consultant.id,
             isVisible: true,
             product: {
-                isRefill: false, // Show only main products in the grid
+                isRefill: false,
+                brand: brandFilter // Filter by Brand if provided
             },
         },
         include: {
             product: {
                 include: {
+                    brand: true, // Include brand info
                     cyclePrices: activeCycle ? {
                         where: { cycleId: activeCycle.id }
                     } : false,
@@ -52,7 +59,6 @@ export default async function CatalogPage({ params }: PageProps) {
                             cyclePrices: activeCycle ? {
                                 where: { cycleId: activeCycle.id }
                             } : false,
-                            // Check if refill is also activated for this consultant
                             consultantProducts: {
                                 where: { consultantId: consultant.id, isVisible: true }
                             }
@@ -63,19 +69,15 @@ export default async function CatalogPage({ params }: PageProps) {
         }
     });
 
-    // 4. Map to UI Model
+    // 5. Map to UI Model
     const products: ProductWithPrice[] = consultantProducts.map((cp) => {
         const p = cp.product;
-
-        // Main Product Price
         const mainPrice = p.cyclePrices[0];
         const basePrice = Number(p.price);
         const promotionalPrice = mainPrice?.isPromotional ? Number(mainPrice.price) : null;
 
-        // Refill Logic
         let refillVersion: ProductWithPrice | null = null;
 
-        // Check if refill exists and is active for this consultant
         if (p.refillProduct && p.refillProduct.consultantProducts.length > 0) {
             const rp = p.refillProduct;
             const refPrice = rp.cyclePrices[0];
@@ -114,6 +116,26 @@ export default async function CatalogPage({ params }: PageProps) {
             <Header consultantName={consultant.name} />
 
             <main className="container mx-auto px-4 py-6">
+
+                {/* Brand Filter */}
+                <div className="flex flex-wrap gap-2 mb-8 justify-center md:justify-start">
+                    <a
+                        href={`/${consultantSlug}`}
+                        className={`px-4 py-2 rounded-full text-sm font-bold transition ${!brandSlug ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                    >
+                        Todas
+                    </a>
+                    {availableBrands.map(b => (
+                        <a
+                            key={b.id}
+                            href={`/${consultantSlug}?brand=${b.slug}`}
+                            className={`px-4 py-2 rounded-full text-sm font-bold transition ${brandSlug === b.slug ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                        >
+                            {b.name}
+                        </a>
+                    ))}
+                </div>
+
                 {/* Banner Active Cycle */}
                 {activeCycle && (
                     <div className="mb-6 rounded-lg bg-orange-100 p-4 text-center text-orange-800 border border-orange-200">
@@ -135,7 +157,12 @@ export default async function CatalogPage({ params }: PageProps) {
 
                 {products.length === 0 && (
                     <div className="text-center py-20 text-gray-500">
-                        <p>La consultora no tiene productos disponibles en este momento.</p>
+                        <p>No se encontraron productos para esta selección.</p>
+                        {brandSlug && (
+                            <a href={`/${consultantSlug}`} className="text-primary hover:underline text-sm mt-2 block">
+                                Ver todas las marcas
+                            </a>
+                        )}
                     </div>
                 )}
             </main>

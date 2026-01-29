@@ -5,17 +5,32 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting seed...')
 
-  // 1. Brand: Natura
-  // Using upsert on unique slug
-  const naturaBrand = await prisma.brand.upsert({
-    where: { slug: 'natura' },
-    update: {},
-    create: {
-      name: 'Natura',
-      slug: 'natura',
-    },
-  })
-  console.log(`✅ Brand: ${naturaBrand.name}`)
+  // 1. Brands
+  const brandsData = [
+    { name: 'Natura', slug: 'natura' },
+    { name: 'Ésika', slug: 'esika' },
+    { name: 'Yanbal', slug: 'yanbal' },
+    { name: 'Otros', slug: 'otros' },
+  ];
+
+  const brandsMap: Record<string, string> = {};
+
+  for (const b of brandsData) {
+    const brand = await prisma.brand.upsert({
+      where: { slug: b.slug },
+      update: {},
+      create: {
+        name: b.name,
+        slug: b.slug,
+        isActive: true
+      }
+    });
+    brandsMap[b.name] = brand.id;
+    console.log(`✅ Brand: ${brand.name}`);
+  }
+
+  // Fallback: Natura ID
+  const naturaBrandId = brandsMap['Natura'];
 
   // 2. Bioactives: Castaña, Tukumã, Andiroba
   // Name is not unique in schema, so we check first to avoid duplicates
@@ -47,7 +62,8 @@ async function main() {
       price: 64.00,
       points: 14,
       isRefill: false,
-      brand: { connect: { id: naturaBrand.id } },
+      isRefill: false,
+      brand: { connect: { id: naturaBrandId } },
       bioactives: {
         create: {
           bioactive: { connect: { id: bioactivesMap['Castaña'] } }
@@ -69,7 +85,7 @@ async function main() {
       price: 52.90,
       points: 11,
       isRefill: true,
-      brand: { connect: { id: naturaBrand.id } },
+      brand: { connect: { id: naturaBrandId } },
       parentProduct: { connect: { id: regularProduct.id } }, // Self-reference
       bioactives: {
         create: {

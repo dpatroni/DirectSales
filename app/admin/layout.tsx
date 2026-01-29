@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Repeat, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Repeat, LogOut, Shield, BadgeCheck, Package } from 'lucide-react';
 
 export default async function AdminLayout({
     children,
@@ -73,6 +73,10 @@ export default async function AdminLayout({
                         <LayoutDashboard className="w-5 h-5" />
                         Dashboard
                     </Link>
+                    <Link href="/admin/products" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
+                        <Package className="w-5 h-5" />
+                        Productos
+                    </Link>
                     <Link href="/admin/consultants" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
                         <Users className="w-5 h-5" />
                         Consultoras
@@ -80,6 +84,10 @@ export default async function AdminLayout({
                     <Link href="/admin/cycles" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
                         <Repeat className="w-5 h-5" />
                         Ciclos
+                    </Link>
+                    <Link href="/admin/brands" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
+                        <BadgeCheck className="w-5 h-5" />
+                        Marcas
                     </Link>
                 </nav>
 
