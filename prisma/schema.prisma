@@ -231,6 +231,7 @@ model Cart {
   
   // Rule: Do not mix products from different cycles.
   cycleId      String?    @map("cycle_id")
+  cycle        Cycle?     @relation(fields: [cycleId], references: [id])
   
   items        CartItem[]
   
