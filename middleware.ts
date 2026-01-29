@@ -14,44 +14,53 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // 2. Initialize Supabase Response
-    // This refreshes the session and sets up the response with auth cookies
-    const { response } = await updateSession(request);
+    try {
+        // 2. Initialize Supabase Response
+        const { response, supabase } = await updateSession(request);
 
-    // 3. Admin Route Protection
-    if (pathname.startsWith('/admin')) {
-        const { user } = await updateSession(request);
-
-        if (!user) {
-            return NextResponse.redirect(new URL('/login', request.url));
+        // If Supabase failed to init (missing env vars), allow request but log it.
+        if (!supabase) {
+            console.warn('⚠️ Middleware: Supabase client not initialized (Missing Env Vars). Proceeding as Guest.');
+            return response;
         }
-        // Strict Role Check handled in Layout
-    }
 
-    // 4. Handle Consultant Slug Persistence
-    // Regex to match typical slug (not starting with _next, api, etc)
-    const isPublicRoute = !pathname.startsWith('/_next') &&
-        !pathname.startsWith('/api') &&
-        !pathname.startsWith('/cart') &&
-        !pathname.startsWith('/checkout') &&
-        !pathname.startsWith('/history') &&
-        !pathname.startsWith('/profile') &&
-        !pathname.startsWith('/login') &&
-        !pathname.startsWith('/auth') &&
-        !pathname.includes('.'); // avoid files
+        // 3. Admin Route Protection
+        if (pathname.startsWith('/admin')) {
+            const { data: { user } } = await supabase.auth.getUser();
 
-    // Simple heuristic: If it's a top-level path that is NOT a reserved route, assume it's a consultant slug
-    if (isPublicRoute && pathname !== '/') {
-        const slug = pathname.split('/')[1];
-        if (slug) {
-            response.cookies.set('consultant_slug', slug, {
-                path: '/',
-                maxAge: 60 * 60 * 24 * 30, // 30 days
-            });
+            if (!user) {
+                return NextResponse.redirect(new URL('/login', request.url));
+            }
         }
-    }
 
-    return response;
+        // 4. Consultant Slug Persistence
+        const isPublicRoute = !pathname.startsWith('/_next') &&
+            !pathname.startsWith('/api') &&
+            !pathname.startsWith('/cart') &&
+            !pathname.startsWith('/checkout') &&
+            !pathname.startsWith('/history') &&
+            !pathname.startsWith('/profile') &&
+            !pathname.startsWith('/login') &&
+            !pathname.startsWith('/auth') &&
+            !pathname.includes('.');
+
+        if (isPublicRoute && pathname !== '/') {
+            const slug = pathname.split('/')[1];
+            if (slug && response.cookies) { // Check if cookies exist on response
+                response.cookies.set('consultant_slug', slug, {
+                    path: '/',
+                    maxAge: 60 * 60 * 24 * 30, // 30 days
+                });
+            }
+        }
+
+        return response;
+
+    } catch (e) {
+        console.error('🔥 Middleware Implementation Error:', e);
+        // Fallback: Proceed without doing anything to avoid white screen
+        return NextResponse.next();
+    }
 }
 
 export const config = {
