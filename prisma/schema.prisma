@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+// 1. Brand (Multi-Marca)
+// ---------------------------------------------------------
+model Brand {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  products  Product[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("brands")
+}
+
+// ---------------------------------------------------------
+// 2. Product (Central Catalog)
+// ---------------------------------------------------------
+model Product {
+  id          String   @id @default(uuid())
+  sku         String   @unique
+  name        String
+  description String?
+  price       Decimal  @default(0.0) @db.Decimal(10, 2) // Base price (PEN)
+  points      Int      // Fixed points
+  isRefill    Boolean  @default(false) @map("is_refill")
+
+  brandId     String   @map("brand_id")
+  brand       Brand    @relation(fields: [brandId], references: [id])
+
+  // Self-reference for Refills (One-to-One: 0 or 1 refill per product)
+  // Logic: Refill points to Parent.
+  parentProductId String?  @unique @map("parent_product_id") 
+  parentProduct   Product? @relation("ProductRefill", fields: [parentProductId], references: [id])
+  
+  // If this product is the parent, it can have one refill referencing it
+  refillProduct   Product? @relation("ProductRefill")
+
+  // Explicit Relations
+  bioactives        ProductBioactive[]
+  bundleItems       BundleItem[]
+  cyclePrices       CycleProductPrice[]
+  consultantProducts ConsultantProduct[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+// ---------------------------------------------------------
+// 3. Bioactive (Explicit Many-to-Many)
+// ---------------------------------------------------------
+model Bioactive {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  
+  products    ProductBioactive[]
+  
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("bioactives")
+}
+
+model ProductBioactive {
+  productId   String    @map("product_id")
+  product     Product   @relation(fields: [productId], references: [id])
+  
+  bioactiveId String    @map("bioactive_id")
+  bioactive   Bioactive @relation(fields: [bioactiveId], references: [id])
+  
+  assignedAt  DateTime  @default(now()) @map("assigned_at")
+
+  @@id([productId, bioactiveId])
+  @@map("product_bioactives")
+}
+
+// ---------------------------------------------------------
+// 4. Cycle (Ciclos / Campañas)
+// ---------------------------------------------------------
+model Cycle {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  isActive  Boolean  @default(false) @map("is_active")
+
+  productPrices CycleProductPrice[]
+  bundles       Bundle[]
+  orders        Order[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cycles")
+}
+
+// Prices per cycle (Promotional)
+model CycleProductPrice {
+  id        String   @id @default(uuid())
+  cycleId   String   @map("cycle_id")
+  cycle     Cycle    @relation(fields: [cycleId], references: [id])
+  
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  price     Decimal  @db.Decimal(10, 2)
+  isPromotional Boolean @default(false) @map("is_promotional")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cycleId, productId])
+  @@map("cycle_product_prices")
+}
+
+// ---------------------------------------------------------
+// 5. Bundle (Kit)
+// ---------------------------------------------------------
+model Bundle {
+  id        String   @id @default(uuid())
+  sku       String   @unique
+  name      String
+  price     Decimal  @db.Decimal(10, 2) // Own price
+  points    Int      // Own points
+  
+  cycleId   String?  @map("cycle_id") // Can belong to a cycle
+  cycle     Cycle?   @relation(fields: [cycleId], references: [id])
+  
+  consultantId String? @map("consultant_id") // Optional: custom bundle
+  consultant   Consultant? @relation(fields: [consultantId], references: [id])
+
+  items     BundleItem[]
+  cartItems CartItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("bundles")
+}
+
+model BundleItem {
+  id        String  @id @default(uuid())
+  bundleId  String  @map("bundle_id")
+  bundle    Bundle  @relation(fields: [bundleId], references: [id])
+  
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+  
+  quantity  Int     @default(1)
+
+  @@map("bundle_items")
+}
+
+// ---------------------------------------------------------
+// 6. Multi-Tenancy (Consultant)
+// ---------------------------------------------------------
+model Consultant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  
+  // Profile
+  bio       String?
+  phone     String?
+  email     String?
+  avatarUrl String?  @map("avatar_url")
+  
+  // Auth
+  authId    String?  @unique @map("auth_id")
+
+  activatedProducts ConsultantProduct[]
+  bundles           Bundle[]
+  carts             Cart[]
+  orders            Order[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("consultants")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  authId    String?  @unique @map("auth_id")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model ConsultantProduct {
+  id           String     @id @default(uuid())
+  consultantId String     @map("consultant_id")
+  consultant   Consultant @relation(fields: [consultantId], references: [id])
+  
+  productId    String     @map("product_id")
+  product      Product    @relation(fields: [productId], references: [id])
+  
+  isVisible    Boolean    @default(true) @map("is_visible")
+  
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt   @map("updated_at")
+
+  @@unique([consultantId, productId])
+  @@map("consultant_products")
+}
+
+// ---------------------------------------------------------
+// 7. Cart
+// ---------------------------------------------------------
+model Cart {
+  id           String     @id @default(uuid())
+  consultantId String     @map("consultant_id")
+  consultant   Consultant @relation(fields: [consultantId], references: [id])
+  
+  // Rule: Do not mix products from different cycles.
+  cycleId      String?    @map("cycle_id")
+  
+  items        CartItem[]
+  
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt   @map("updated_at")
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  cartId    String  @map("cart_id")
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  
+  // Item can be Product or Bundle
+  productId String? @map("product_id")
+  product   Product? @relation(fields: [productId], references: [id])
+  
+  bundleId  String? @map("bundle_id")
+  bundle    Bundle? @relation(fields: [bundleId], references: [id])
+  
+  quantity  Int     @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt   @map("updated_at")
+
+  @@map("cart_items")
+}
+
+// ---------------------------------------------------------
+// 8. Order (Checkout)
+// ---------------------------------------------------------
+model Order {
+  id        String   @id @default(uuid())
+  status    String   @default("DRAFT") // DRAFT, SENT, CONFIRMED, CANCELLED
+  
+  totalMoney  Decimal  @db.Decimal(10, 2) @map("total_money")
+  totalPoints Int      @map("total_points")
+
+  consultantId String     @map("consultant_id")
+  consultant   Consultant @relation(fields: [consultantId], references: [id])
+  
+  cycleId      String?    @map("cycle_id")
+  cycle        Cycle?     @relation(fields: [cycleId], references: [id])
+
+  items        OrderItem[]
+
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt   @map("updated_at")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  productId String?  @map("product_id")
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // Snapshot data (Historical record)
+  nameSnapshot     String   @map("name_snapshot")
+  priceSnapshot    Decimal  @db.Decimal(10, 2) @map("price_snapshot")
+  pointsSnapshot   Int      @map("points_snapshot")
+  isRefillSnapshot Boolean  @map("is_refill_snapshot")
+  
+  quantity  Int
+
+  @@map("order_items")
+}
