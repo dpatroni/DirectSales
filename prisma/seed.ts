@@ -61,8 +61,6 @@ async function main() {
       description: 'Pulpa hidratante corporal 400ml',
       price: 64.00,
       points: 14,
-      isRefill: false,
-      isRefill: false,
       brand: { connect: { id: naturaBrandId } },
       bioactives: {
         create: {

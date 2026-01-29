@@ -4,59 +4,90 @@ import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { LayoutDashboard, Users, Repeat, LogOut, Shield, BadgeCheck, Package } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    // Force dynamic to ensure auth check runs every time
     // 1. Verify Admin Access
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
         redirect('/login');
     }
 
-    // Check against Admin Table
-    const admin = await prisma.admin.findUnique({
-        where: { authId: user.id },
-    });
-
-    // Fallback: Check if email matches an admin (and link if needed, similar to consultant)
-    if (!admin) {
-        if (!user.email) redirect('/login'); // Should not happen if logged in
-
-        const potentialAdmin = await prisma.admin.findUnique({
-            where: { email: user.email },
+    try {
+        // Check against Admin Table
+        const admin = await prisma.admin.findUnique({
+            where: { authId: user.id },
         });
 
-        if (potentialAdmin) {
-            // Auto-Link
-            await prisma.admin.update({
-                where: { id: potentialAdmin.id },
-                data: { authId: user.id }
+        // Fallback: Check if email matches an admin
+        if (!admin) {
+            if (!user.email) redirect('/login');
+
+            const potentialAdmin = await prisma.admin.findUnique({
+                where: { email: user.email },
             });
-            // Continue (render children)
-        } else {
-            // Not an admin
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                    <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
-                        <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                        <h1 className="text-xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
-                        <p className="text-gray-500 mb-4">Tu usuario ({user.email}) no tiene permisos de administrador.</p>
-                        <form action={async () => {
-                            'use server';
-                            const sb = await createClient();
-                            await sb.auth.signOut();
-                            redirect('/login');
-                        }}>
-                            <button className="text-red-600 font-bold hover:underline">Cerrar Sesión</button>
-                        </form>
+
+            if (potentialAdmin) {
+                // Check if already linked
+                if (potentialAdmin.authId !== user.id) {
+                    // Auto-Link
+                    await prisma.admin.update({
+                        where: { id: potentialAdmin.id },
+                        data: { authId: user.id }
+                    });
+                }
+            } else {
+                // Not an admin
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                        <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
+                            <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                            <h1 className="text-xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
+                            <p className="text-gray-500 mb-4">Tu usuario ({user.email}) no tiene permisos de administrador.</p>
+                            <form action={async () => {
+                                'use server';
+                                const sb = await createClient();
+                                await sb.auth.signOut();
+                                redirect('/login');
+                            }}>
+                                <button className="text-red-600 font-bold hover:underline">Cerrar Sesión</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )
+                )
+            }
         }
+    } catch (error) {
+        console.error('Admin Layout Error:', error);
+        // Clean error message for production
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+
+        // If it's a redirect, let it pass (Next.js redirects are thrown errors)
+        if (msg.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
+
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-lg border-l-4 border-red-500">
+                    <h1 className="text-lg font-bold text-red-700 mb-2">Error del Sistema (Admin)</h1>
+                    <p className="text-sm text-gray-600 mb-4">Ocurrió un problema verificando los permisos.</p>
+                    <pre className="bg-gray-100 p-3 rounded text-xs text-left overflow-auto mb-4 font-mono text-red-800">
+                        {msg}
+                    </pre>
+                    <a href="/admin" className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 text-sm font-bold">
+                        Reintentar
+                    </a>
+                </div>
+            </div>
+        );
     }
 
     return (
