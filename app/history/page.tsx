@@ -25,7 +25,7 @@ export default async function HistoryPage() {
                 where: { consultantId: consultant.id },
                 orderBy: { createdAt: 'desc' },
                 include: {
-                    orderItems: true, // You might want this later
+                    items: true,
                     cycle: true
                 }
             });
