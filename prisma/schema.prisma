@@ -276,6 +276,9 @@ model Order {
   cycleId      String?    @map("cycle_id")
   cycle        Cycle?     @relation(fields: [cycleId], references: [id])
 
+  clientName   String?    @map("client_name")
+  clientPhone  String?    @map("client_phone")
+
   items        OrderItem[]
 
   createdAt    DateTime   @default(now()) @map("created_at")

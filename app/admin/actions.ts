@@ -34,7 +34,7 @@ export async function createConsultant(formData: FormData) {
         });
     } catch (e) {
         console.error(e);
-        return { error: 'Error al crear consultora. El slug o email podría estar duplicado.' };
+        throw new Error('Error al crear consultora. El slug o email podría estar duplicado.');
     }
 
     revalidatePath('/admin/consultants');
@@ -68,7 +68,7 @@ export async function updateConsultant(id: string, formData: FormData) {
         });
     } catch (e) {
         console.error(e);
-        return { error: 'Error al actualizar.' };
+        throw new Error('Error al actualizar consultora');
     }
 
     revalidatePath('/admin/consultants');
