@@ -14,9 +14,20 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Other config here
     images: {
-        domains: ['ui-avatars.com'] // Allow external avatar domain
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'ui-avatars.com',
+                port: '',
+                pathname: '/api/**',
+            },
+        ],
+    },
+    // Adding empty turbopack config to silence warning if needed, 
+    // though usually handled by not passing --turbo to build
+    experimental: {
+        // serverActions: true, // enabled by default in 14+
     }
 };
 
