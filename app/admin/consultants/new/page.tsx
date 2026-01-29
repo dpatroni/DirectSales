@@ -10,9 +10,10 @@ export default function NewConsultantPage() {
 
     async function handleSubmit(formData: FormData) {
         startTransition(async () => {
-            const result = await createConsultant(formData);
-            if (result?.error) {
-                alert(result.error);
+            try {
+                await createConsultant(formData);
+            } catch (error) {
+                alert('Error al crear consultora. Verifique los datos.');
             }
         });
     }
