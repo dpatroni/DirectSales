@@ -89,6 +89,7 @@ export default async function CatalogPage({ params }: PageProps) {
                 points: rp.points,
                 isRefill: true,
                 promotionalPrice: refPromotionalPrice,
+                imageUrl: rp.imageUrl,
             };
         }
 
