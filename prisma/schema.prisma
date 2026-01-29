@@ -101,6 +101,7 @@ model Cycle {
   productPrices CycleProductPrice[]
   bundles       Bundle[]
   orders        Order[]
+  carts         Cart[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
