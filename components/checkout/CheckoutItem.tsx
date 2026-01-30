@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react';
 import Image from 'next/image';
-import { Minus, Plus, Trash } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Trash } from 'lucide-react';
 import { updateItemQuantity, removeCartItem } from '@/app/actions';
 
 interface CheckoutItemProps {
@@ -30,59 +30,65 @@ export function CheckoutItem({ item, cycleId }: CheckoutItemProps) {
     };
 
     return (
-        <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-            <div className="relative h-16 w-16 shrink-0 bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
+        <div className="group flex items-center gap-4 bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-sm border border-white/60 transition-all duration-300 hover:shadow-md">
+            {/* Image Container */}
+            <div className="relative h-20 w-20 shrink-0 bg-white rounded-xl overflow-hidden shadow-inner border border-gray-50 flex items-center justify-center p-1">
                 {product.imageUrl ? (
                     <Image
                         src={product.imageUrl}
                         alt={product.name}
                         fill
-                        className="object-cover"
-                        unoptimized
+                        className="object-contain p-1 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+                        sizes="80px"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-xs">No img</div>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-[10px] text-gray-300 font-bold uppercase tracking-tight">
+                        <ShoppingBag className="w-5 h-5 mb-1 opacity-20" />
+                        Sin foto
+                    </div>
                 )}
                 {variant?.color && (
                     <div
-                        className="absolute bottom-1 right-1 w-4 h-4 rounded-full border border-white shadow-sm ring-1 ring-gray-200"
+                        className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-white shadow-md ring-1 ring-black/5"
                         style={{ backgroundColor: variant.color }}
                     />
                 )}
             </div>
 
-            <div className="flex-1 min-w-0">
-                <p className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal line-clamp-1">
+            {/* Info Section */}
+            <div className="flex-1 min-w-0 py-1">
+                <p className="text-gray-950 text-base font-black leading-tight tracking-tight line-clamp-2">
                     {product.name}
                 </p>
-                <div className="flex flex-col">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-normal">
+                <div className="mt-1.5 flex flex-col gap-0.5">
+                    <p className="text-gray-400 text-xs font-bold tracking-wide">
                         S/ {price.toFixed(2)} c/u
                     </p>
                     {variant && (
-                        <p className="text-[10px] text-orange-600 font-medium truncate">
+                        <p className="text-[10px] text-natura-orange font-black uppercase tracking-[0.1em]">
                             Tono: {variant.name}
                         </p>
                     )}
                 </div>
             </div>
 
-            <div className="shrink-0">
-                <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-1 rounded-lg border border-gray-100 dark:border-gray-700">
+            {/* Actions Section */}
+            <div className="shrink-0 pl-1">
+                <div className="flex items-center gap-2 bg-gray-100/50 p-1.5 rounded-xl border border-gray-100">
                     <button
                         disabled={isPending}
                         onClick={() => handleUpdate(-1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md bg-white dark:bg-gray-700 shadow-sm text-slate-600 dark:text-slate-200 hover:bg-gray-100 active:scale-95 disabled:opacity-50"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm text-gray-950 hover:bg-gray-50 active:scale-90 transition-all disabled:opacity-50"
                     >
-                        {item.quantity === 1 ? <Trash className="w-3 h-3 text-red-500" /> : <Minus className="w-3 h-3" />}
+                        {item.quantity === 1 ? <Trash className="w-3.5 h-3.5 text-red-500" /> : <Minus className="w-3.5 h-3.5" />}
                     </button>
-                    <span className="text-sm font-bold w-4 text-center tabular-nums">{item.quantity}</span>
+                    <span className="text-sm font-black w-5 text-center tabular-nums text-gray-950">{item.quantity}</span>
                     <button
                         disabled={isPending}
                         onClick={() => handleUpdate(1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-white shadow-sm hover:bg-orange-600 active:scale-95 disabled:opacity-50"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-950 text-white shadow-sm hover:bg-black active:scale-90 transition-all disabled:opacity-50"
                     >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5" />
                     </button>
                 </div>
             </div>
