@@ -5,6 +5,7 @@ import { HorizontalProductCard, ProductWithPrice } from '@/components/ui/Horizon
 import { cookies } from 'next/headers';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ShoppingBag } from 'lucide-react';
 
 // Helper
 function cn(...inputs: (string | undefined | null | false)[]) {
@@ -123,94 +124,118 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
     });
 
     return (
-        <div className="min-h-screen bg-[#FDFCFD] mesh-gradient pb-24">
+        <div className="min-h-screen bg-[#FDFCFD] mesh-gradient pb-32 overflow-hidden relative">
+            {/* Ambient Lighting Effects */}
+            <div className="ambient-glow -top-20 -left-20" />
+            <div className="ambient-glow top-[40%] -right-40" style={{ background: 'radial-gradient(circle, hsla(45, 100%, 75%, 0.05) 0%, transparent 70%)' }} />
+
             <Header consultantName={consultant.name} />
 
-            <main className="container mx-auto px-4 py-8 relative">
-                {/* 1. Brand Filters (Premium Chips) */}
-                <div className="no-scrollbar mb-12 flex snap-x items-center gap-3 overflow-x-auto pb-4 pt-1">
-                    <a
-                        href={`/${consultantSlug}`}
-                        className={cn(
-                            "flex snap-center items-center justify-center whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
-                            !brandSlug
-                                ? "bg-natura-orange text-white shadow-xl shadow-orange-500/20 scale-105"
-                                : "bg-white/80 backdrop-blur-md text-gray-400 border border-gray-100 hover:border-orange-200 hover:text-orange-600 shadow-sm"
-                        )}
-                    >
-                        Todas
-                    </a>
-                    {availableBrands.map(b => (
-                        <a
-                            key={b.id}
-                            href={`/${consultantSlug}?brand=${b.slug}`}
-                            className={cn(
-                                "flex snap-center items-center justify-center whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
-                                brandSlug === b.slug
-                                    ? "bg-natura-orange text-white shadow-xl shadow-orange-500/20 scale-105"
-                                    : "bg-white/80 backdrop-blur-md text-gray-400 border border-gray-100 hover:border-orange-200 hover:text-orange-600 shadow-sm"
-                            )}
-                        >
-                            {b.name}
-                        </a>
-                    ))}
-                </div>
-
-                {/* 2. Banner Active Cycle (Premium Dark Mode) */}
+            <main className="container mx-auto px-6 py-12 relative z-10">
+                {/* 1. HERO BANNER - Gallery Style */}
                 {activeCycle && (
-                    <div className="relative mb-16 overflow-hidden rounded-[3rem] bg-[#0f0f0f] p-10 md:p-14 text-white shadow-3xl">
-                        {/* Interactive gradients */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-transparent to-amber-500/10 opacity-60" />
-                        <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-orange-600/20 blur-[120px] animate-pulse" />
-                        <div className="absolute -left-20 -bottom-20 h-96 w-96 rounded-full bg-amber-500/10 blur-[120px]" />
+                    <div className="relative mb-24 group">
+                        <div className="absolute inset-0 bg-black rounded-[4rem] transition-transform duration-700 group-hover:scale-[1.01]" />
 
-                        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
-                            <div className="max-w-xl">
-                                <div className="inline-flex items-center gap-2.5 rounded-full bg-white/5 px-4 py-1.5 backdrop-blur-xl border border-white/10 mb-6">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                                    </span>
-                                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-400">Exclusive Cycle</span>
+                        {/* Elite Textures */}
+                        <div className="absolute inset-0 overflow-hidden rounded-[4rem]">
+                            <div className="absolute -right-20 -top-20 h-[500px] w-[500px] rounded-full bg-orange-600/30 blur-[140px] animate-pulse" />
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" />
+                        </div>
+
+                        <div className="relative z-10 p-12 md:p-20 flex flex-col lg:flex-row lg:items-center justify-between gap-16">
+                            <div className="max-w-2xl">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="h-[1px] w-12 bg-orange-500/50" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-orange-400">Limited Edition</span>
                                 </div>
 
-                                <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.85] mb-6">
+                                <h2 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.8] mb-10">
                                     {activeCycle.name.split(' ')[0]} <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-300 to-amber-200">
-                                        {activeCycle.name.split(' ')[1] || 'Edition'}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-200 to-white">
+                                        {activeCycle.name.split(' ')[1] || 'VIBES'}
                                     </span>
                                 </h2>
 
-                                <p className="text-gray-400 text-base font-medium max-w-sm leading-relaxed">
-                                    Explora las mejores ofertas de la temporada seleccionadas especialmente para ti.
+                                <p className="text-gray-400 text-lg md:text-xl font-medium max-w-md leading-relaxed opacity-80">
+                                    Una curaduría de lujo diseñada para realzar tu belleza natural este periodo.
                                 </p>
                             </div>
 
-                            <div className="bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] p-8 border border-white/5 lg:min-w-[280px] flex flex-col items-center">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-4">Válido hasta</p>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-6xl font-black text-white lining-nums tabular-nums">
-                                        {activeCycle.endDate.getDate()}
-                                    </span>
-                                    <div className="flex flex-col">
-                                        <span className="text-xl font-black uppercase text-orange-400 leading-none">
-                                            {activeCycle.endDate.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '')}
-                                        </span>
-                                        <span className="text-sm font-bold text-gray-600 leading-none mt-1">
-                                            {activeCycle.endDate.getFullYear()}
-                                        </span>
+                            <div className="lg:min-w-[320px]">
+                                <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] p-10 border border-white/10 flex flex-col items-center shadow-2xl">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-6">Expiración</span>
+
+                                    <div className="flex items-center gap-6">
+                                        <div className="text-center">
+                                            <span className="block text-7xl font-black text-white leading-none lining-nums tabular-nums uppercase">
+                                                {activeCycle.endDate.getDate()}
+                                            </span>
+                                        </div>
+                                        <div className="h-16 w-[1px] bg-white/10" />
+                                        <div className="flex flex-col">
+                                            <span className="text-2xl font-black uppercase text-orange-400 leading-none">
+                                                {activeCycle.endDate.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '')}
+                                            </span>
+                                            <span className="text-sm font-bold text-gray-600 mt-1">
+                                                {activeCycle.endDate.getFullYear()}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="mt-8 w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-orange-600 to-amber-400 w-2/3 rounded-full" />
+
+                                    <div className="mt-10 w-full">
+                                        <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                                            <span>Progress</span>
+                                            <span>85%</span>
+                                        </div>
+                                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-gradient-to-r from-orange-600 via-orange-400 to-amber-300 w-[85%] rounded-full shadow-[0_0_15px_rgba(244,130,33,0.5)]" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* 3. Product Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {/* 2. MINIMALIST NAVIGATION */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 px-2">
+                    <div>
+                        <span className="text-[10px] font-black text-natura-orange uppercase tracking-[0.4em] mb-4 block">Catálogo</span>
+                        <h3 className="text-4xl font-black text-gray-950 tracking-tighter">Nuestras Marcas</h3>
+                    </div>
+
+                    <div className="no-scrollbar flex items-center gap-4 overflow-x-auto pb-2">
+                        <a
+                            href={`/${consultantSlug}`}
+                            className={cn(
+                                "whitespace-nowrap px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500",
+                                !brandSlug
+                                    ? "bg-black text-white shadow-2xl shadow-black/20 scale-105"
+                                    : "bg-white text-gray-400 border border-gray-100 hover:border-black hover:text-black"
+                            )}
+                        >
+                            Todas
+                        </a>
+                        {availableBrands.map(b => (
+                            <a
+                                key={b.id}
+                                href={`/${consultantSlug}?brand=${b.slug}`}
+                                className={cn(
+                                    "whitespace-nowrap px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500",
+                                    brandSlug === b.slug
+                                        ? "bg-black text-white shadow-2xl shadow-black/20 scale-105"
+                                        : "bg-white text-gray-400 border border-gray-100 hover:border-black hover:text-black"
+                                )}
+                            >
+                                {b.name}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 3. PRODUCT GRID - High Res Spacing */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
                     {products.map((product) => (
                         <HorizontalProductCard
                             key={product.id}
@@ -221,21 +246,25 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
                     ))}
                 </div>
 
+                {/* Empty State */}
                 {products.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-24 text-center">
-                        <div className="size-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <span className="material-symbols-outlined text-gray-400 text-4xl">inventory_2</span>
+                    <div className="flex flex-col items-center justify-center py-40 text-center">
+                        <div className="size-32 elite-glass rounded-full flex items-center justify-center mb-8 animate-bounce">
+                            <ShoppingBag className="text-gray-200 w-12 h-12" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900">No hay productos disponibles</h3>
-                        <p className="text-gray-500 mt-2 max-w-xs">Intenta seleccionando otra marca o vuelve más tarde.</p>
+                        <h3 className="text-3xl font-black text-gray-950 tracking-tighter">Colección no disponible</h3>
+                        <p className="text-gray-400 mt-4 max-w-xs font-medium">Estamos actualizando nuestro stock. Intenta con otra marca.</p>
                         {brandSlug && (
-                            <a href={`/${consultantSlug}`} className="mt-6 text-natura-orange font-bold hover:underline">
-                                Ver todas las marcas
+                            <a href={`/${consultantSlug}`} className="mt-10 px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:scale-110 transition-transform">
+                                Volver al inicio
                             </a>
                         )}
                     </div>
                 )}
             </main>
+
+            {/* Bottom Decor */}
+            <div className="absolute bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-orange-50/30 to-transparent pointer-events-none -z-10" />
         </div>
     );
 }
