@@ -132,64 +132,59 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
             <Header consultantName={consultant.name} />
 
             <main className="container mx-auto px-6 py-12 relative z-10">
-                {/* 1. HERO BANNER - Gallery Style */}
+                {/* 1. HERO BANNER - Luxury Light Edition */}
                 {activeCycle && (
                     <div className="relative mb-24 group">
-                        <div className="absolute inset-0 bg-black rounded-[4rem] transition-transform duration-700 group-hover:scale-[1.01]" />
-
-                        {/* Elite Textures */}
-                        <div className="absolute inset-0 overflow-hidden rounded-[4rem]">
-                            <div className="absolute -right-20 -top-20 h-[500px] w-[500px] rounded-full bg-orange-600/30 blur-[140px] animate-pulse" />
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" />
-                        </div>
+                        {/* Soft Ethereal Background */}
+                        <div className="absolute inset-0 elite-glass rounded-[4rem] transition-all duration-700 group-hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] border-white/80" />
 
                         <div className="relative z-10 p-12 md:p-20 flex flex-col lg:flex-row lg:items-center justify-between gap-16">
                             <div className="max-w-2xl">
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="h-[1px] w-12 bg-orange-500/50" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-orange-400">Limited Edition</span>
+                                    <div className="h-[1.5px] w-12 bg-natura-orange/30" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-natura-orange">Edición Limitada</span>
                                 </div>
 
-                                <h2 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.8] mb-10">
+                                <h2 className="text-6xl md:text-9xl font-black text-gray-950 tracking-tighter leading-[0.8] mb-10">
                                     {activeCycle.name.split(' ')[0]} <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-200 to-white">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-natura-orange via-orange-400 to-pink-500">
                                         {activeCycle.name.split(' ')[1] || 'VIBES'}
                                     </span>
                                 </h2>
 
-                                <p className="text-gray-400 text-lg md:text-xl font-medium max-w-md leading-relaxed opacity-80">
-                                    Una curaduría de lujo diseñada para realzar tu belleza natural este periodo.
+                                <p className="text-gray-500 text-lg md:text-xl font-medium max-w-md leading-relaxed">
+                                    Curaduría profesional de alta gama diseñada para resaltar tu brillo natural.
                                 </p>
                             </div>
 
                             <div className="lg:min-w-[320px]">
-                                <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] p-10 border border-white/10 flex flex-col items-center shadow-2xl">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-6">Expiración</span>
+                                <div className="bg-white/40 backdrop-blur-3xl rounded-[3rem] p-10 border border-white/60 flex flex-col items-center shadow-[0_20px_50px_-20px_rgba(0,0,0,0.03)] group-hover:-translate-y-2 transition-transform duration-700">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 mb-6">Expiración</span>
 
                                     <div className="flex items-center gap-6">
                                         <div className="text-center">
-                                            <span className="block text-7xl font-black text-white leading-none lining-nums tabular-nums uppercase">
+                                            <span className="block text-7xl font-black text-gray-950 leading-none lining-nums tabular-nums uppercase">
                                                 {activeCycle.endDate.getDate()}
                                             </span>
                                         </div>
-                                        <div className="h-16 w-[1px] bg-white/10" />
+                                        <div className="h-16 w-[1px] bg-gray-200" />
                                         <div className="flex flex-col">
-                                            <span className="text-2xl font-black uppercase text-orange-400 leading-none">
+                                            <span className="text-2xl font-black uppercase text-natura-orange leading-none">
                                                 {activeCycle.endDate.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '')}
                                             </span>
-                                            <span className="text-sm font-bold text-gray-600 mt-1">
+                                            <span className="text-sm font-bold text-gray-400 mt-1">
                                                 {activeCycle.endDate.getFullYear()}
                                             </span>
                                         </div>
                                     </div>
 
                                     <div className="mt-10 w-full">
-                                        <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                                        <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-400 mb-2">
                                             <span>Progress</span>
                                             <span>85%</span>
                                         </div>
-                                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-gradient-to-r from-orange-600 via-orange-400 to-amber-300 w-[85%] rounded-full shadow-[0_0_15px_rgba(244,130,33,0.5)]" />
+                                        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="h-full bg-gradient-to-r from-natura-orange to-orange-300 w-[85%] rounded-full" />
                                         </div>
                                     </div>
                                 </div>
