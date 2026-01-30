@@ -201,7 +201,7 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                             {displayProduct.name}
                         </h2>
 
-                        <p className="text-sm font-medium text-gray-400 mt-4 line-clamp-2 leading-relaxed max-w-[90%]">
+                        <p className="text-sm font-medium text-gray-600 mt-4 line-clamp-3 leading-relaxed max-w-[95%]">
                             {displayProduct.description || 'Diseño exclusivo natura para una experiencia de cuidado superior.'}
                         </p>
 
@@ -222,7 +222,7 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                                         </div>
                                     )}
                                 </div>
-                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                                     {variants.length} tonos
                                 </span>
                             </div>
@@ -242,23 +242,22 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                             </div>
                         </div>
 
-                        {/* Add Button - High Impact Clean */}
+                        {/* Add Button - Luxury Boutique Style */}
                         <button
                             onClick={handleAddToCart}
                             disabled={isPending}
-                            className="group/btn relative h-14 px-8 rounded-3xl bg-black text-white text-[11px] font-black uppercase tracking-[0.2em] overflow-hidden transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-xl shadow-black/10">
+                            className="group/btn relative h-12 px-6 rounded-2xl border-2 border-gray-950 bg-white/30 backdrop-blur-md text-gray-950 text-[10px] font-black uppercase tracking-[0.2em] overflow-hidden transition-all duration-300 hover:bg-gray-950 hover:text-white active:scale-95 shadow-sm"
+                        >
                             <div className="relative z-10 flex items-center gap-3">
                                 {isPending ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <>
-                                        <ShoppingBag className="w-5 h-5" />
+                                        <ShoppingBag className="w-4 h-4" />
                                         <span>{hasVariants ? 'Elegir' : 'Llevar'}</span>
                                     </>
                                 )}
                             </div>
-                            {/* Accent Glow on Button Hover */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-natura-orange to-orange-400 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
                         </button>
                     </div>
                 </div>
