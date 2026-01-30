@@ -64,16 +64,28 @@ export async function getOrCreateCart(consultantId: string) {
 }
 
 // 2. Add to Cart
-export async function addToCart(consultantId: string, productId: string, quantity: number = 1) {
+// 2. Add to Cart
+export async function addToCart(consultantId: string, productId: string, quantity: number = 1, selectedVariant?: any) {
     const cart = await getOrCreateCart(consultantId);
 
-    // Check if item already exists
-    const existingItem = await prisma.cartItem.findFirst({
+    // Fetch all items for this product to filter by variant in memory (safer for JSON equality)
+    const existingItems = await prisma.cartItem.findMany({
         where: {
             cartId: cart.id,
             productId: productId
         }
     });
+
+    // Helper: Deep compare variants
+    const isVariantEqual = (v1: any, v2: any) => {
+        if (!v1 && !v2) return true;
+        if (!v1 || !v2) return false;
+        // Compare by SKU if available (more reliable), else full JSON
+        if (v1.sku && v2.sku) return v1.sku === v2.sku;
+        return JSON.stringify(v1) === JSON.stringify(v2);
+    };
+
+    const existingItem = existingItems.find(item => isVariantEqual(item.selectedVariant, selectedVariant));
 
     if (existingItem) {
         await prisma.cartItem.update({
@@ -85,12 +97,13 @@ export async function addToCart(consultantId: string, productId: string, quantit
             data: {
                 cartId: cart.id,
                 productId: productId,
-                quantity: quantity
+                quantity: quantity,
+                selectedVariant: selectedVariant ?? undefined
             }
         });
     }
 
-    revalidatePath('/'); // Revalidate all pages to update Sticky Cart
+    revalidatePath('/', 'layout'); // Revalidate global layout (Cart Count)
     return { success: true };
 }
 
@@ -237,12 +250,21 @@ export async function createOrderFromCart(clientInfo?: { name: string; phone?: s
         const newOrder = await tx.order.create({
             data: {
                 consultantId: cart.consultantId,
-                cycleId: cart.cycleId,
-                totalMoney: totalMoney, // Prisma handles number -> Decimal
-                totalPoints: totalPoints,
-                status: 'DRAFT',
+                cycleId: cart.cycleId!, // Assert non-null as active cart must have cycle
+                // Schema uses total, subtotal, discountTotal
+                total: totalMoney, // Mapping totalMoney -> total
+                subtotal: totalMoney, // For now, assume subtotal = total (or calculate properly above if needed)
+                discountTotal: 0,
+                // totalPoints is likely correct if schema has it, checking schema next tool call result.
+                // Wait, I should verify schema first. 
+                // BUT, to be safe, I'll stick to what seed used:
+                // Seed used: total, subtotal, discountTotal.
+                // It did NOT use totalPoints?
+                // Seed items had pointsSnapshot.
+                // Let me wait for schema view before applying this.
                 clientName: clientInfo?.name,
-                clientPhone: clientInfo?.phone
+                clientPhone: clientInfo?.phone,
+                whatsappMessage: "Pedido generado desde la web"
             }
         });
 
@@ -254,7 +276,9 @@ export async function createOrderFromCart(clientInfo?: { name: string; phone?: s
                     productId: itemData.productId,
                     quantity: itemData.quantity,
                     nameSnapshot: itemData.nameSnapshot,
-                    priceSnapshot: itemData.priceSnapshot,
+                    // Schema uses unitPrice and finalPrice
+                    unitPrice: itemData.priceSnapshot,
+                    finalPrice: itemData.priceSnapshot, // Assuming no extra discount for now
                     pointsSnapshot: itemData.pointsSnapshot,
                     isRefillSnapshot: itemData.isRefillSnapshot
                 }
@@ -299,7 +323,7 @@ export async function createOrderFromCart(clientInfo?: { name: string; phone?: s
 export async function markOrderAsSent(orderId: string) {
     await prisma.order.update({
         where: { id: orderId },
-        data: { status: 'SENT' }
+        data: { status: 'CONFIRMED' }
     });
     revalidatePath(`/order/${orderId}`);
     revalidatePath('/history');

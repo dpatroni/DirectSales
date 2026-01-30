@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { Header } from '@/components/layout/Header';
-import { ProductCard, ProductWithPrice } from '@/components/ui/ProductCard';
+import { HorizontalProductCard, ProductWithPrice } from '@/components/ui/HorizontalProductCard';
 import { cookies } from 'next/headers';
 
 interface PageProps {
@@ -94,6 +94,8 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
                 isRefill: true,
                 promotionalPrice: refPromotionalPrice,
                 imageUrl: rp.imageUrl,
+                variants: rp.variants, // Map variants if refill has them
+                brand: p.brand // Parent's brand
             };
         }
 
@@ -107,21 +109,27 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
             isRefill: false,
             imageUrl: p.imageUrl,
             promotionalPrice,
-            refillProduct: refillVersion
+            refillProduct: refillVersion,
+            brand: p.brand,
+            variants: p.variants // Map variants
         };
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-[#FDFCFD] mesh-gradient pb-24">
             <Header consultantName={consultant.name} />
 
-            <main className="container mx-auto px-4 py-6">
-
-                {/* Brand Filter */}
-                <div className="flex flex-wrap gap-2 mb-8 justify-center md:justify-start">
+            <main className="container mx-auto px-4 py-8 relative">
+                {/* 1. Brand Filters (Premium Chips) */}
+                <div className="no-scrollbar mb-10 flex snap-x items-center gap-3 overflow-x-auto pb-4 pt-2">
                     <a
                         href={`/${consultantSlug}`}
-                        className={`px-4 py-2 rounded-full text-sm font-bold transition ${!brandSlug ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                        className={cn(
+                            "flex snap-center items-center justify-center whitespace-nowrap px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300",
+                            !brandSlug
+                                ? "bg-natura-orange text-white shadow-lg shadow-orange-500/25 scale-105"
+                                : "bg-white text-gray-500 border border-gray-100 hover:border-orange-200 hover:text-orange-600"
+                        )}
                     >
                         Todas
                     </a>
@@ -129,37 +137,79 @@ export default async function CatalogPage({ params, searchParams }: PageProps) {
                         <a
                             key={b.id}
                             href={`/${consultantSlug}?brand=${b.slug}`}
-                            className={`px-4 py-2 rounded-full text-sm font-bold transition ${brandSlug === b.slug ? 'bg-primary text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                            className={cn(
+                                "flex snap-center items-center justify-center whitespace-nowrap px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300",
+                                brandSlug === b.slug
+                                    ? "bg-natura-orange text-white shadow-lg shadow-orange-500/25 scale-105"
+                                    : "bg-white text-gray-500 border border-gray-100 hover:border-orange-200 hover:text-orange-600"
+                            )}
                         >
                             {b.name}
                         </a>
                     ))}
                 </div>
 
-                {/* Banner Active Cycle */}
+                {/* 2. Banner Active Cycle (Premium Display) */}
                 {activeCycle && (
-                    <div className="mb-6 rounded-lg bg-orange-100 p-4 text-center text-orange-800 border border-orange-200">
-                        <h2 className="text-sm font-bold uppercase tracking-wide">
-                            {activeCycle.name}
-                        </h2>
-                        <p className="text-xs mt-1">
-                            Precios promocionales vigentes hasta el {activeCycle.endDate.toLocaleDateString()}
-                        </p>
+                    <div className="relative mb-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-600 p-8 text-white shadow-2xl shadow-orange-500/20">
+                        {/* Decorative elements */}
+                        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+                        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-orange-300/10 blur-3xl" />
+
+                        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            <div>
+                                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 backdrop-blur-sm border border-white/10 mb-3">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                    </span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">Cerrando pronto</span>
+                                </div>
+                                <h2 className="text-4xl font-black tracking-tight leading-tight">
+                                    {activeCycle.name.split(' ')[0]} <br />
+                                    <span className="text-orange-100">{activeCycle.name.split(' ')[1]}</span>
+                                </h2>
+                            </div>
+
+                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 min-w-[200px]">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-orange-100 mb-1">Válido hasta</p>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-black">
+                                        {activeCycle.endDate.getDate()}
+                                    </span>
+                                    <span className="text-sm font-bold uppercase">
+                                        {activeCycle.endDate.toLocaleDateString('es-PE', { month: 'long' })}
+                                    </span>
+                                </div>
+                                <div className="mt-2 h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                                    <div className="h-full bg-white w-3/4 rounded-full" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {/* 3. Product Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} consultantId={consultant.id} />
+                        <HorizontalProductCard
+                            key={product.id}
+                            product={product}
+                            consultantId={consultant.id}
+                            consultantSlug={consultantSlug}
+                        />
                     ))}
                 </div>
 
                 {products.length === 0 && (
-                    <div className="text-center py-20 text-gray-500">
-                        <p>No se encontraron productos para esta selección.</p>
+                    <div className="flex flex-col items-center justify-center py-24 text-center">
+                        <div className="size-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <span className="material-symbols-outlined text-gray-400 text-4xl">inventory_2</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900">No hay productos disponibles</h3>
+                        <p className="text-gray-500 mt-2 max-w-xs">Intenta seleccionando otra marca o vuelve más tarde.</p>
                         {brandSlug && (
-                            <a href={`/${consultantSlug}`} className="text-primary hover:underline text-sm mt-2 block">
+                            <a href={`/${consultantSlug}`} className="mt-6 text-natura-orange font-bold hover:underline">
                                 Ver todas las marcas
                             </a>
                         )}

@@ -15,7 +15,13 @@ model Brand {
   name      String
   slug      String   @unique
   isActive  Boolean  @default(true) @map("is_active")
+  defaultCommissionRate Decimal @default(0.0) @db.Decimal(10, 2) @map("default_commission_rate")
   products  Product[]
+  commissions Commission[]
+  
+  // Opposite relation for Consultant Onboarding
+  primaryConsultants Consultant[]
+  categories Category[]
   
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -39,6 +45,13 @@ model Product {
   brandId     String   @map("brand_id")
   brand       Brand    @relation(fields: [brandId], references: [id])
 
+  // Variants (JSON for flexibility: colors, sizes, etc.)
+  // Structure: [{ name: "Red", sku: "123", value: "#FF0000" }]
+  variants    Json?
+
+  categoryId  String?  @map("category_id")
+  category    Category? @relation(fields: [categoryId], references: [id])
+
   // Self-reference for Refills (One-to-One: 0 or 1 refill per product)
   // Logic: Refill points to Parent.
   parentProductId String?  @unique @map("parent_product_id") 
@@ -54,11 +67,28 @@ model Product {
   consultantProducts ConsultantProduct[]
   cartItems         CartItem[]
   orderItems        OrderItem[]
+  promotions        PromotionProduct[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("products")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  
+  brandId   String?   @map("brand_id") // Optional: Global vs Brand specific
+  brand     Brand?    @relation(fields: [brandId], references: [id])
+
+  products  Product[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
 }
 
 // ---------------------------------------------------------
@@ -104,6 +134,9 @@ model Cycle {
   bundles       Bundle[]
   orders        Order[]
   carts         Cart[]
+  promotions    Promotion[]
+  commissions   Commission[]
+  payouts       Payout[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -185,10 +218,17 @@ model Consultant {
   // Auth
   authId    String?  @unique @map("auth_id")
 
+  // Onboarding Data
+  primaryBrandId String? @map("primary_brand_id")
+  primaryBrand   Brand?  @relation(fields: [primaryBrandId], references: [id])
+
   activatedProducts ConsultantProduct[]
   bundles           Bundle[]
   carts             Cart[]
   orders            Order[]
+  customers         Customer[]
+  commissions       Commission[]
+  payouts           Payout[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -258,6 +298,8 @@ model CartItem {
   
   quantity  Int     @default(1)
 
+  selectedVariant Json? @map("selected_variant")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt   @map("updated_at")
 
@@ -267,23 +309,47 @@ model CartItem {
 // ---------------------------------------------------------
 // 8. Order (Checkout)
 // ---------------------------------------------------------
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  ORDERED_TO_BRAND
+  IN_TRANSIT
+  DELIVERED
+  CANCELED
+}
+
 model Order {
-  id        String   @id @default(uuid())
-  status    String   @default("DRAFT") // DRAFT, SENT, CONFIRMED, CANCELLED
+  id        String      @id @default(uuid())
+  status    OrderStatus @default(DRAFT)
   
-  totalMoney  Decimal  @db.Decimal(10, 2) @map("total_money")
-  totalPoints Int      @map("total_points")
+  statusUpdatedAt DateTime @default(now()) @map("status_updated_at")
+  confirmedAt     DateTime? @map("confirmed_at")
+  canceledAt      DateTime? @map("canceled_at")
+
+  subtotal      Decimal @db.Decimal(10, 2)
+  discountTotal Decimal @map("discount_total") @db.Decimal(10, 2)
+  total         Decimal @db.Decimal(10, 2) 
+
+  whatsappMessage String @map("whatsapp_message") @db.Text
 
   consultantId String     @map("consultant_id")
   consultant   Consultant @relation(fields: [consultantId], references: [id])
   
-  cycleId      String?    @map("cycle_id")
-  cycle        Cycle?     @relation(fields: [cycleId], references: [id])
+  cycleId      String     @map("cycle_id") // Made mandatory per requirements
+  cycle        Cycle      @relation(fields: [cycleId], references: [id])
+
+  // Customer Relation (Added in Phase Customers PRO)
+  customerId   String?    @map("customer_id") // Optional for migration safety, then required? User said "NO orders without client". We make it optional first to avoid migration failure on existing data, or default? existing orders have clientName.
+  customer     Customer?  @relation(fields: [customerId], references: [id])
 
   clientName   String?    @map("client_name")
   clientPhone  String?    @map("client_phone")
 
   items        OrderItem[]
+  commissions  Commission[]
+  notifications Notification[]
 
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt   @map("updated_at")
@@ -301,11 +367,190 @@ model OrderItem {
 
   // Snapshot data (Historical record)
   nameSnapshot     String   @map("name_snapshot")
-  priceSnapshot    Decimal  @db.Decimal(10, 2) @map("price_snapshot")
+  
+  // Financial specifics per item
+  quantity         Int
+  unitPrice        Decimal  @map("unit_price") @db.Decimal(10, 2) // Original/Base Price
+  promoId          String?  @map("promo_id")
+  promotion        Promotion? @relation(fields: [promoId], references: [id])
+  
+  finalPrice       Decimal  @map("final_price") @db.Decimal(10, 2) // Price after discounts
+
   pointsSnapshot   Int      @map("points_snapshot")
   isRefillSnapshot Boolean  @map("is_refill_snapshot")
   
-  quantity  Int
+  selectedVariant Json? @map("selected_variant")
 
   @@map("order_items")
+}
+
+// ---------------------------------------------------------
+// 9. Promotions (Promociones PRO)
+// ---------------------------------------------------------
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_PRICE
+}
+
+model Promotion {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  
+  discountType  DiscountType @map("discount_type")
+  discountValue Decimal      @db.Decimal(10, 2) @map("discount_value")
+  
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+  isActive      Boolean  @default(true) @map("is_active")
+
+  // Relation to Cycle (Required per requirements)
+  cycleId       String   @map("cycle_id")
+  cycle         Cycle    @relation(fields: [cycleId], references: [id])
+
+  products      PromotionProduct[]
+  orderItems    OrderItem[]
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("promotions")
+}
+
+model PromotionProduct {
+  promotionId String    @map("promotion_id")
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  productId   String    @map("product_id")
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  assignedAt  DateTime  @default(now()) @map("assigned_at")
+
+  @@id([promotionId, productId])
+  @@map("promotion_products")
+}
+
+// ---------------------------------------------------------
+// 10. Commissions (Ganancias)
+// ---------------------------------------------------------
+model Commission {
+  id               String   @id @default(uuid())
+  consultantId     String   @map("consultant_id")
+  orderId          String   @map("order_id")
+  cycleId          String   @map("cycle_id")
+  brandId          String   @map("brand_id")
+  
+  grossAmount      Decimal  @db.Decimal(10, 2) @map("gross_amount")
+  commissionAmount Decimal  @db.Decimal(10, 2) @map("commission_amount")
+  commissionRate   Decimal  @db.Decimal(10, 2) @map("commission_rate")
+  
+  status           String   @default("VALID") // VALID, CANCELLED
+  
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  consultant Consultant @relation(fields: [consultantId], references: [id])
+  order      Order      @relation(fields: [orderId], references: [id])
+  cycle      Cycle      @relation(fields: [cycleId], references: [id])
+  brand      Brand      @relation(fields: [brandId], references: [id])
+
+  payoutId   String?    @map("payout_id")
+  payout     Payout?    @relation(fields: [payoutId], references: [id])
+
+  @@map("commissions")
+}
+
+// ---------------------------------------------------------
+// 11. Payouts (Liquidaciones PRO)
+// ---------------------------------------------------------
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+model Payout {
+  id            String       @id @default(uuid())
+  consultantId  String       @map("consultant_id")
+  cycleId       String       @map("cycle_id")
+  
+  totalAmount   Decimal      @db.Decimal(10, 2) @map("total_amount")
+  status        PayoutStatus @default(PENDING)
+  
+  generatedAt   DateTime     @default(now()) @map("generated_at")
+  paidAt        DateTime?    @map("paid_at")
+
+  // Relations
+  consultant    Consultant   @relation(fields: [consultantId], references: [id])
+  cycle         Cycle        @relation(fields: [cycleId], references: [id])
+  commissions   Commission[]
+  notifications Notification[]
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@unique([consultantId, cycleId]) // One payout per consultant per cycle
+  @@map("payouts")
+}
+
+model Customer {
+  id           String   @id @default(uuid())
+  fullName     String   @map("full_name")
+  phone        String   @map("phone") // Unique per consultant? Global for now.
+  email        String?  @map("email")
+  
+  consultantId String     @map("consultant_id")
+  consultant   Consultant @relation(fields: [consultantId], references: [id])
+
+  orders       Order[]
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
+// ---------------------------------------------------------
+// 12. Notifications (WhatsApp PRO)
+// ---------------------------------------------------------
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_CONFIRMED
+  ORDER_IN_TRANSIT
+  ORDER_DELIVERED
+  ORDER_CANCELED
+  PAYOUT_AVAILABLE
+}
+
+enum RecipientType {
+  CUSTOMER
+  CONSULTANT
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  type          NotificationType
+  channel       String           @default("WHATSAPP")
+  recipientType RecipientType    @map("recipient_type")
+  recipientId   String           @map("recipient_id") // ID of Customer or Consultant
+  
+  // Contexts
+  orderId       String?          @map("order_id")
+  order         Order?           @relation(fields: [orderId], references: [id])
+  
+  payoutId      String?          @map("payout_id")
+  payout        Payout?          @relation(fields: [payoutId], references: [id]) 
+
+  message       String           @db.Text
+  status        String           @default("PENDING") // PENDING, SENT, FAILED
+  metadata      Json?            
+
+  sentAt        DateTime?        @map("sent_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  @@map("notifications")
 }

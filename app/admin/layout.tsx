@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Repeat, LogOut, Shield, BadgeCheck, Package } from 'lucide-react';
+import { LayoutDashboard, Users, Repeat, LogOut, Shield, BadgeCheck, Package, Percent, ShoppingBag, DollarSign } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,6 +115,10 @@ export default async function AdminLayout({
                         <Package className="w-5 h-5" />
                         Productos
                     </Link>
+                    <Link href="/admin/orders" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
+                        <ShoppingBag className="w-5 h-5" />
+                        Pedidos
+                    </Link>
                     <Link href="/admin/consultants" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
                         <Users className="w-5 h-5" />
                         Consultoras
@@ -126,6 +130,14 @@ export default async function AdminLayout({
                     <Link href="/admin/brands" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
                         <BadgeCheck className="w-5 h-5" />
                         Marcas
+                    </Link>
+                    <Link href="/admin/promotions" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
+                        <Percent className="w-5 h-5" />
+                        Promociones
+                    </Link>
+                    <Link href="/admin/commissions" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-primary rounded-lg transition font-medium">
+                        <DollarSign className="w-5 h-5" />
+                        Comisiones
                     </Link>
                 </nav>
 

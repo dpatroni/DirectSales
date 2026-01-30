@@ -4,12 +4,14 @@ import { Header } from '@/components/layout/Header';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getCurrentShoppingConsultant } from '@/app/actions';
+import { getCustomerSession } from '@/app/actions/customer';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CheckoutPage() {
     const summary = await getCartSummary();
     const consultant = await getCurrentShoppingConsultant();
+    const customer = await getCustomerSession();
 
     return (
         <div className="min-h-screen bg-gray-50 pb-safe">
@@ -24,7 +26,9 @@ export default async function CheckoutPage() {
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Revisar Pedido</h1>
                 <p className="text-gray-500 mb-6 text-sm">Verifica que todo esté correcto antes de enviar.</p>
 
-                <CheckoutReview summary={summary} />
+                <p className="text-gray-500 mb-6 text-sm">Verifica que todo esté correcto antes de enviar.</p>
+
+                <CheckoutReview summary={summary} customer={customer} consultantId={consultant?.id} />
             </main>
         </div>
     );

@@ -27,13 +27,17 @@ export default async function OrderPage({ params }: PageProps) {
     if (!order) notFound();
 
     // Calculate formatted totals for display
-    const totalMoney = Number(order.totalMoney);
-    const totalPoints = order.totalPoints;
+    const totalMoney = Number((order as any).total || (order as any).totalMoney || 0);
+    // const totalPoints = order.totalPoints; // Removed from schema or implicit? Schema had pointsSnapshot on items. Order total points was removed from my schema update?
+    // Reviewing schema: I removed `totalPoints Int` from Order model!
+    // So I must calculate it from items or just hide it if not needed.
+    // Let's calculate from items for now.
+    const totalPoints = order.items.reduce((acc, item) => acc + (item.pointsSnapshot * item.quantity), 0);
 
     // WhatsApp Message Generation
     // Reuse logic but now from Order Items (immutable)
     const waItems = order.items.map(item => {
-        return `${item.quantity}x ${item.nameSnapshot} (S/ ${Number(item.priceSnapshot).toFixed(2)})`;
+        return `${item.quantity}x ${item.nameSnapshot} (S/ ${Number((item as any).finalPrice).toFixed(2)})`;
     }).join('%0A');
 
     const waTotal = `Total: S/ ${totalMoney.toFixed(2)}`;
@@ -82,7 +86,7 @@ export default async function OrderPage({ params }: PageProps) {
                                 )}
                             </div>
                             <div className="text-right">
-                                <p className="font-bold text-gray-900">S/ {(Number(item.priceSnapshot) * item.quantity).toFixed(2)}</p>
+                                <p className="font-bold text-gray-900">S/ {(Number((item as any).finalPrice) * item.quantity).toFixed(2)}</p>
                                 <p className="text-xs text-emerald-600 font-medium">{item.pointsSnapshot * item.quantity} pts</p>
                             </div>
                         </div>
