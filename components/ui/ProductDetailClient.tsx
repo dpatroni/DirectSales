@@ -240,12 +240,12 @@ export function ProductDetailClient({ product, consultant }: ProductDetailClient
                     </div>
                 </main>
 
-                {/* Fixed Bottom Action Bar */}
-                <div className="fixed bottom-0 left-0 right-0 w-full max-w-[430px] mx-auto p-8 pt-12 bg-gradient-to-t from-[#FDFCFD] via-[#FDFCFD] to-transparent z-50">
-                    <div className="flex gap-4">
+                {/* Fixed Bottom Action Bar - Floating above BottomNav */}
+                <div className="fixed bottom-20 left-0 right-0 w-full max-w-[430px] mx-auto p-6 z-[60]">
+                    <div className="elite-glass rounded-[2.5rem] p-4 flex gap-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border-white/60">
                         <button
                             onClick={handleWhatsAppOrder}
-                            className="bg-emerald-600 text-white p-5 rounded-[2rem] shadow-2xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-90"
+                            className="bg-emerald-600 text-white p-5 rounded-[2rem] shadow-xl hover:bg-emerald-700 transition-all active:scale-90"
                         >
                             <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                                 <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.512-2.96-2.626-.088-.113-.716-.953-.716-1.819 0-.866.454-1.292.614-1.456.16-.163.346-.204.461-.204a.274.274 0 0 1 .204.091c.081.091.279.684.305.736.026.053.04.113.003.188-.036.075-.054.12-.11.185-.058.067-.114.113-.163.171-.052.057-.107.119-.046.223.061.103.27.446.58.723.4.357.737.467.841.52.104.053.166.044.227-.026.061-.07.259-.301.328-.404.069-.103.138-.088.232-.053.093.035.592.279.695.331.102.053.171.079.197.123s.026.255-.118.66z" />
@@ -255,7 +255,7 @@ export function ProductDetailClient({ product, consultant }: ProductDetailClient
                         <button
                             onClick={handleAddToCart}
                             disabled={isPending || (hasVariants && !selectedVariant)}
-                            className="flex-1 bg-gray-950 text-white py-5 rounded-[2rem] flex items-center justify-center gap-4 shadow-2xl shadow-gray-200 hover:bg-black transition-all active:scale-95 disabled:bg-gray-200 disabled:shadow-none"
+                            className="flex-1 bg-gray-950 text-white py-5 rounded-[2rem] flex items-center justify-center gap-4 shadow-xl hover:bg-black transition-all active:scale-95 disabled:bg-gray-200 disabled:shadow-none"
                         >
                             {isPending ? (
                                 <span className="animate-pulse text-[10px] font-black uppercase tracking-[0.3em]">Preparando...</span>
