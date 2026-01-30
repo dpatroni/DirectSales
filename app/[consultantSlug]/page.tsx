@@ -3,6 +3,13 @@ import prisma from '@/lib/prisma';
 import { Header } from '@/components/layout/Header';
 import { HorizontalProductCard, ProductWithPrice } from '@/components/ui/HorizontalProductCard';
 import { cookies } from 'next/headers';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+// Helper
+function cn(...inputs: (string | undefined | null | false)[]) {
+    return twMerge(clsx(inputs));
+}
 
 interface PageProps {
     params: Promise<{
