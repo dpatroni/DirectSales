@@ -241,7 +241,7 @@ export function ProductDetailClient({ product, consultant }: ProductDetailClient
                 </main>
 
                 {/* Fixed Bottom Action Bar - Floating above BottomNav */}
-                <div className="fixed bottom-20 left-0 right-0 w-full max-w-[430px] mx-auto p-6 z-[60]">
+                <div className="fixed bottom-24 left-0 right-0 w-full max-w-[430px] mx-auto p-6 z-[60]">
                     <div className="elite-glass rounded-[2.5rem] p-4 flex gap-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border-white/60">
                         <button
                             onClick={handleWhatsAppOrder}
