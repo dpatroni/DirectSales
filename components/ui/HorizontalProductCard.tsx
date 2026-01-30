@@ -145,131 +145,143 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
             </Modal>
 
 
-            {/* CARD */}
-            <div className="group premium-card rounded-[2rem] p-5 flex flex-col sm:flex-row gap-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-500/5">
-                {/* Image Section */}
-                <div className="relative w-full sm:w-40 h-48 sm:h-40 flex-shrink-0 overflow-hidden rounded-2xl bg-[#f8f8f8]">
+            {/* ELITE CARD */}
+            <div className="group relative elite-glass rounded-[2.5rem] p-6 flex flex-col sm:flex-row gap-8 transition-all duration-700 hover:-translate-y-3 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)]">
+                {/* Background Glow on Hover */}
+                <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                {/* Image Section (45% on desktop) */}
+                <div className="relative w-full sm:w-48 h-56 sm:h-48 flex-shrink-0 overflow-hidden rounded-[2rem] bg-white/40">
                     {displayProduct.imageUrl ? (
                         <Image
                             src={displayProduct.imageUrl}
                             alt={displayProduct.name}
                             fill
-                            className="object-contain p-2 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
-                            sizes="(max-width: 640px) 100vw, 160px"
+                            className="object-contain p-4 mix-blend-multiply transition-transform duration-1000 group-hover:scale-110"
+                            sizes="(max-width: 640px) 100vw, 192px"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-200">
-                            <ShoppingBag className="w-10 h-10" />
+                        <div className="w-full h-full flex items-center justify-center text-gray-100">
+                            <ShoppingBag className="w-12 h-12" />
                         </div>
                     )}
 
-                    {/* Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
+                    {/* Elite Badges */}
+                    <div className="absolute top-4 left-4 flex flex-col items-start gap-2">
                         {isPromo && (
-                            <span className="bg-natura-orange text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-orange-500/30">
+                            <span className="bg-black text-white text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-xl">
                                 {discountPercent}% OFF
                             </span>
                         )}
                         {displayProduct.isRefill && (
-                            <span className="bg-emerald-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-emerald-500/30">
-                                Repuesto
+                            <span className="bg-emerald-600 text-white text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-xl">
+                                Eco Repuesto
                             </span>
                         )}
                     </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="flex-grow flex flex-col justify-between py-1">
+                {/* Content Section (55% on desktop) */}
+                <div className="relative z-10 flex-grow flex flex-col justify-between py-2">
                     <div>
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-[9px] font-black text-natura-orange uppercase tracking-[0.2em] opacity-80">
-                                {displayProduct.brand?.name || 'Natura'}
-                            </span>
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-2">
+                                <span className="size-1.5 rounded-full bg-natura-orange animate-pulse" />
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                                    {displayProduct.brand?.name || 'Natura'}
+                                </span>
+                            </div>
 
-                            {/* Points Badge */}
-                            <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100">
-                                💎 {displayProduct.points} <span className="text-[8px] opacity-60">PTS</span>
+                            {/* Reward Points */}
+                            <div className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.1em] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                                +{displayProduct.points} <span className="opacity-50">PTS</span>
                             </div>
                         </div>
 
-                        <h2 className="text-lg font-black leading-[1.1] text-gray-900 line-clamp-2 transition-colors group-hover:text-natura-orange">
+                        <h2 className="text-2xl font-black leading-[1] text-gray-950 tracking-tighter transition-colors group-hover:text-natura-orange">
                             {displayProduct.name}
                         </h2>
 
-                        <p className="text-xs font-medium text-gray-400 mt-2 line-clamp-2 leading-relaxed">
-                            {displayProduct.description || 'Producto exclusivo de Natura'}
+                        <p className="text-sm font-medium text-gray-400 mt-4 line-clamp-2 leading-relaxed max-w-[90%]">
+                            {displayProduct.description || 'Diseño exclusivo natura para una experiencia de cuidado superior.'}
                         </p>
 
-                        {/* Variant indicator */}
+                        {/* Elite Variants display */}
                         {hasVariants && (
-                            <div className="mt-3 flex items-center gap-2">
-                                <div className="flex -space-x-1.5">
-                                    {variants.slice(0, 4).map((v, i) => (
+                            <div className="mt-6 flex items-center gap-4">
+                                <div className="flex -space-x-2">
+                                    {variants.slice(0, 5).map((v, i) => (
                                         <div
                                             key={i}
-                                            className="size-4 rounded-full border-2 border-white ring-1 ring-gray-100 shadow-sm"
-                                            style={{ backgroundColor: v.color || '#ccc' }}
+                                            className="size-5 rounded-full border-2 border-white shadow-md ring-1 ring-black/5"
+                                            style={{ backgroundColor: v.color || '#eee' }}
                                         />
                                     ))}
-                                    {variants.length > 4 && (
-                                        <div className="size-4 rounded-full bg-gray-50 flex items-center justify-center text-[7px] font-black text-gray-500 border-2 border-white shadow-sm">
-                                            +{variants.length - 4}
+                                    {variants.length > 5 && (
+                                        <div className="size-5 rounded-full bg-black flex items-center justify-center text-[8px] font-black text-white border-2 border-white shadow-md">
+                                            +{variants.length - 5}
                                         </div>
                                     )}
                                 </div>
-                                <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
-                                    {variants.length} Tonos
+                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">
+                                    Colección de {variants.length} tonos
                                 </span>
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-end justify-between mt-4">
+                    <div className="flex items-end justify-between mt-8">
                         <div>
                             {isPromo && (
-                                <span className="block text-[10px] font-bold text-gray-300 line-through mb-1">
+                                <span className="block text-[11px] font-bold text-gray-300 line-through tracking-wider mb-1">
                                     S/ {displayProduct.basePrice.toFixed(2)}
                                 </span>
                             )}
-                            <div className="text-2xl font-black text-gray-950 tracking-tighter">
-                                <span className="text-sm font-bold mr-0.5">S/</span>
+                            <div className="text-3xl font-black text-gray-950 tracking-tighter flex items-baseline">
+                                <span className="text-sm font-bold mr-1">S/</span>
                                 {price.toFixed(2)}
                             </div>
                         </div>
 
-                        {/* Add Button */}
-                        <div className="relative group/btn-container">
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={isPending}
-                                className="relative z-10 flex items-center gap-2 bg-gray-950 text-white h-12 px-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] hover:bg-natura-orange hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-gray-950/20 hover:shadow-orange-500/40"
-                            >
+                        {/* Add Button - High Impact */}
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={isPending}
+                            className="group/btn relative h-14 px-8 rounded-3xl bg-black text-white text-[11px] font-black uppercase tracking-[0.2em] overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-black/20"
+                        >
+                            <div className="relative z-10 flex items-center gap-3">
                                 {isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <>
-                                        <ShoppingBag className="w-4 h-4" />
-                                        {hasVariants ? 'Elegir' : 'Llevar'}
+                                        <ShoppingBag className="w-5 h-5" />
+                                        <span>{hasVariants ? 'Elegir' : 'Llevar'}</span>
                                     </>
                                 )}
-                            </button>
-                        </div>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Refill Toggle (Refined Toggle Label) */}
+            {/* Refill / Original Toggle (Minimalist) */}
             {hasRefillOption && (
-                <div className="flex justify-end mt-2 mb-6 px-4">
+                <div className="flex justify-end mt-4 mb-10 px-6">
                     <button
                         onClick={() => setIsRefillView(!isRefillView)}
-                        className="group flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-natura-orange transition-colors"
+                        className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-natura-orange transition-all"
                     >
                         <div className={cn(
-                            "w-2 h-2 rounded-full border transition-all",
-                            isRefillView ? "bg-natura-orange border-natura-orange" : "bg-transparent border-gray-300"
-                        )} />
-                        {isRefillView ? 'Ver Versión Original' : 'Ver Opción Repuesto'}
+                            "w-8 h-4 rounded-full border-2 transition-all relative flex items-center",
+                            isRefillView ? "bg-natura-orange border-natura-orange" : "bg-transparent border-gray-200"
+                        )}>
+                            <div className={cn(
+                                "size-2 rounded-full absolute transition-all",
+                                isRefillView ? "right-1 bg-white" : "left-1 bg-gray-300"
+                            )} />
+                        </div>
+                        {isRefillView ? 'Ver Original' : 'Eco Repuesto'}
                     </button>
                 </div>
             )}
