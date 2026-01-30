@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { addToCart } from '@/app/actions';
 import { ShoppingBag, Loader2, Check } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Toast } from './Toast';
 import { Modal } from './Modal';
 
@@ -151,7 +152,10 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                 <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
                 {/* Image Section (45% on desktop) */}
-                <div className="relative w-full sm:w-48 h-56 sm:h-48 flex-shrink-0 overflow-hidden rounded-[2rem] bg-white/80 transition-all duration-700 group-hover:bg-white shadow-sm border border-white/40">
+                <Link
+                    href={`/${consultantSlug}/products/${displayProduct.sku}`}
+                    className="relative w-full sm:w-48 h-56 sm:h-48 flex-shrink-0 overflow-hidden rounded-[2rem] bg-white/80 transition-all duration-700 group-hover:bg-white shadow-sm border border-white/40 block"
+                >
                     {displayProduct.imageUrl ? (
                         <Image
                             src={displayProduct.imageUrl}
@@ -178,7 +182,7 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                             </span>
                         )}
                     </div>
-                </div>
+                </Link>
 
                 {/* Content Section (55% on desktop) */}
                 <div className="relative z-10 flex-grow flex flex-col justify-between py-2">
@@ -197,9 +201,11 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                             </div>
                         </div>
 
-                        <h2 className="text-2xl font-black leading-[1.1] text-gray-950 tracking-tighter transition-colors group-hover:text-natura-orange">
-                            {displayProduct.name}
-                        </h2>
+                        <Link href={`/${consultantSlug}/products/${displayProduct.sku}`}>
+                            <h2 className="text-2xl font-black leading-[1.1] text-gray-950 tracking-tighter transition-colors group-hover:text-natura-orange">
+                                {displayProduct.name}
+                            </h2>
+                        </Link>
 
                         <p className="text-sm font-medium text-gray-600 mt-4 line-clamp-3 leading-relaxed max-w-[95%]">
                             {displayProduct.description || 'Diseño exclusivo natura para una experiencia de cuidado superior.'}

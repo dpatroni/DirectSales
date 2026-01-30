@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const RECOVERY_MAP: Record<string, string> = {
-    'NAT-001': 'https://production.na01.natura.com/html/html-global/0/img/prods/PE/512x512/72973.png', // Ekos Castaña
-    'NAT-002': 'https://production.na01.natura.com/html/html-global/0/img/prods/PE/512x512/22560.png', // Kaiak Clásico
+    'NAT-001': 'https://production.na01.natura.com/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw2043697e/images/products/73846/73846.jpg', // Ekos Castaña
+    'NAT-002': 'https://production.na01.natura.com/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw8d55734e/images/products/69124/69124.jpg', // Kaiak Clásico
     'KAIAK01': 'https://production.na01.natura.com/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw8d55734e/images/products/69124/69124.jpg',
     'EKOS01': 'https://production.na01.natura.com/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw2043697e/images/products/73846/73846.jpg',
     'CHRONOS01': 'https://production.na01.natura.com/on/demandware.static/-/Sites-natura-br-storefront-catalog/default/dw1d965d56/images/products/91849/91849.jpg',
