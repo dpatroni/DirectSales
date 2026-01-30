@@ -146,32 +146,32 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
 
 
             {/* CARD */}
-            <div className="group bg-white dark:bg-gray-800 rounded-3xl p-4 flex gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-gray-100/50 dark:border-gray-700 transition-all duration-500 hover:-translate-y-1">
+            <div className="group premium-card rounded-[2rem] p-5 flex flex-col sm:flex-row gap-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-500/5">
                 {/* Image Section */}
-                <div className="relative w-36 h-36 flex-shrink-0 overflow-hidden rounded-2xl bg-[#F8F9FA] dark:bg-gray-700 group-hover:scale-105 transition-transform duration-500">
+                <div className="relative w-full sm:w-40 h-48 sm:h-40 flex-shrink-0 overflow-hidden rounded-2xl bg-[#f8f8f8]">
                     {displayProduct.imageUrl ? (
                         <Image
                             src={displayProduct.imageUrl}
                             alt={displayProduct.name}
                             fill
-                            className="object-cover mix-blend-multiply transition-opacity duration-300 group-hover:opacity-90"
-                            sizes="144px"
+                            className="object-contain p-2 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
+                            sizes="(max-width: 640px) 100vw, 160px"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300">
-                            <ShoppingBag className="w-8 h-8 opacity-10" />
+                        <div className="w-full h-full flex items-center justify-center text-gray-200">
+                            <ShoppingBag className="w-10 h-10" />
                         </div>
                     )}
 
                     {/* Badges */}
-                    <div className="absolute top-2 left-2 flex flex-col items-start gap-1.5">
+                    <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
                         {isPromo && (
-                            <span className="bg-natura-orange text-white text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-orange-500/30">
-                                {discountPercent}% Dcto
+                            <span className="bg-natura-orange text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-orange-500/30">
+                                {discountPercent}% OFF
                             </span>
                         )}
                         {displayProduct.isRefill && (
-                            <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-emerald-500/30">
+                            <span className="bg-emerald-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-emerald-500/30">
                                 Repuesto
                             </span>
                         )}
@@ -179,94 +179,97 @@ export function HorizontalProductCard({ product, consultantId, consultantSlug }:
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-grow flex flex-col justify-between py-0.5">
+                <div className="flex-grow flex flex-col justify-between py-1">
                     <div>
-                        <div className="flex justify-between items-start mb-1">
-                            <span className="text-[9px] font-black text-natura-orange uppercase tracking-[0.2em]">
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-[9px] font-black text-natura-orange uppercase tracking-[0.2em] opacity-80">
                                 {displayProduct.brand?.name || 'Natura'}
                             </span>
 
                             {/* Points Badge */}
-                            <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-[9px] font-black border border-emerald-100/50">
-                                <span className="text-[10px]">💎</span> {displayProduct.points} <span className="text-[8px] opacity-70">PTS</span>
+                            <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100">
+                                💎 {displayProduct.points} <span className="text-[8px] opacity-60">PTS</span>
                             </div>
                         </div>
 
-                        <h2 className="text-[15px] font-extrabold leading-tight text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-natura-orange transition-colors">
+                        <h2 className="text-lg font-black leading-[1.1] text-gray-900 line-clamp-2 transition-colors group-hover:text-natura-orange">
                             {displayProduct.name}
                         </h2>
 
-                        <p className="text-[11px] font-medium text-gray-400 dark:text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+                        <p className="text-xs font-medium text-gray-400 mt-2 line-clamp-2 leading-relaxed">
                             {displayProduct.description || 'Producto exclusivo de Natura'}
                         </p>
 
                         {/* Variant indicator */}
                         {hasVariants && (
-                            <div className="mt-2 flex items-center gap-1.5">
+                            <div className="mt-3 flex items-center gap-2">
                                 <div className="flex -space-x-1.5">
-                                    {variants.slice(0, 3).map((v, i) => (
+                                    {variants.slice(0, 4).map((v, i) => (
                                         <div
                                             key={i}
-                                            className="size-3.5 rounded-full border-2 border-white ring-1 ring-gray-100"
+                                            className="size-4 rounded-full border-2 border-white ring-1 ring-gray-100 shadow-sm"
                                             style={{ backgroundColor: v.color || '#ccc' }}
                                         />
                                     ))}
-                                    {variants.length > 3 && (
-                                        <div className="size-3.5 rounded-full bg-gray-100 flex items-center justify-center text-[7px] font-bold text-gray-500 border-2 border-white">
-                                            +{variants.length - 3}
+                                    {variants.length > 4 && (
+                                        <div className="size-4 rounded-full bg-gray-50 flex items-center justify-center text-[7px] font-black text-gray-500 border-2 border-white shadow-sm">
+                                            +{variants.length - 4}
                                         </div>
                                     )}
                                 </div>
-                                <span className="text-[10px] font-bold text-orange-600">
-                                    Tonos disponibles
+                                <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
+                                    {variants.length} Tonos
                                 </span>
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-end justify-between mt-4">
                         <div>
                             {isPromo && (
-                                <span className="block text-[10px] font-bold text-gray-300 line-through leading-none mb-1">
+                                <span className="block text-[10px] font-bold text-gray-300 line-through mb-1">
                                     S/ {displayProduct.basePrice.toFixed(2)}
                                 </span>
                             )}
-                            <div className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
-                                <span className="text-xs font-bold mr-0.5">S/</span>
+                            <div className="text-2xl font-black text-gray-950 tracking-tighter">
+                                <span className="text-sm font-bold mr-0.5">S/</span>
                                 {price.toFixed(2)}
                             </div>
                         </div>
 
                         {/* Add Button */}
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={isPending}
-                            className="group/btn relative overflow-hidden bg-natura-orange text-white h-11 px-5 rounded-2xl text-[11px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-500/20"
-                        >
-                            <div className="flex items-center gap-2 relative z-10">
+                        <div className="relative group/btn-container">
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={isPending}
+                                className="relative z-10 flex items-center gap-2 bg-gray-950 text-white h-12 px-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] hover:bg-natura-orange hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-gray-950/20 hover:shadow-orange-500/40"
+                            >
                                 {isPending ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <>
-                                        <ShoppingBag className="w-3.5 h-3.5" />
+                                        <ShoppingBag className="w-4 h-4" />
                                         {hasVariants ? 'Elegir' : 'Llevar'}
                                     </>
                                 )}
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-600 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                        </button>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Refill Toggle (Optional - Below card if space permits, or inline) */}
+            {/* Refill Toggle (Refined Toggle Label) */}
             {hasRefillOption && (
-                <div className="flex justify-end -mt-1 mb-3 px-2">
+                <div className="flex justify-end mt-2 mb-6 px-4">
                     <button
                         onClick={() => setIsRefillView(!isRefillView)}
-                        className="text-[10px] text-gray-500 underline decoration-dotted"
+                        className="group flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-natura-orange transition-colors"
                     >
-                        {isRefillView ? 'Ver producto original' : 'Ver opción de repuesto'}
+                        <div className={cn(
+                            "w-2 h-2 rounded-full border transition-all",
+                            isRefillView ? "bg-natura-orange border-natura-orange" : "bg-transparent border-gray-300"
+                        )} />
+                        {isRefillView ? 'Ver Versión Original' : 'Ver Opción Repuesto'}
                     </button>
                 </div>
             )}
